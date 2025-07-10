@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grid</title>
+    <style>
+      section {
+        display: grid;
+        grid-template-columns: 150px 150px 150px;
+        grid-template-rows: 150px 150px 150px;
+        row-gap: 6px;
+        column-gap: 6px;
+      }
+      /* .box {
+        border: 2px solid red;
+      } */
+      .box img {
+        width: 100%;
+        height: 100%;
+      }
+      #img1 {
+        grid-row: 1;
+        grid-column: 1;
+      }
+      #img2 {
+        grid-row-start: 1;
+        grid-row-end: 3;
+      }
+      #img3 {
+        grid-column: 3;
+        grid-row: 1;
+      }
+      #img6 {
+        grid-row: 2;
+        grid-column: 3;
+      }
+      #img4 {
+        grid-row-start: 2;
+        grid-row-end: 4;
+      }
+      #img5 {
+        grid-column-start: 2;
+        grid-column-end: 4;
+        /* grid-row-end: 5;*/
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>x
+      <div class="box" id="img1" title="img1">
+        <img src="./assets/img/10 must have bag items for women (1).jpg" alt="" />
+      </div>
+      <div class="box" id="img2" title="img2">
+        <img src="./assets/img/10 must have bag items for women.jpg" alt="" />
+      </div>
+      <div class="box" id="img3" title="img3">
+        <img src="./assets/img/Collections.jpg" alt="" />
+      </div>
+      <div class="box" id="img4" title="img4">
+        <img src="./assets/img/download (1).jpg" alt="" />
+      </div>
+      <div class="box" id="img5" title="img5">
+        <img src="./assets/img/download.jpg" alt="" />
+      </div>
+      <div class="box" id="img6" title="img6">
+        <img src="assets/img/LUXURY Top Handle Handbag _.jpg" alt="" />
+      </div>
+      <!-- <div><img src="" alt=""></div> -->
+    </section>
+  </body>
+</html>
