@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript MCQ Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+
+    .question-box {
+      display: none;
+      padding: 15px;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      background: #f1f8ff;
+      margin-bottom: 20px;
+    }
+
+    .question {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .options label {
+      display: block;
+      background: #fff;
+      margin: 8px 0;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .options input {
+      margin-right: 10px;
+    }
+
+    .options label:hover {
+      background: #e9f5ff;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      background: #212cff;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #result {
+      display: none;
+      font-weight: bold;
+      font-size: 20px;
+      text-align: center;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💡 JavaScript MCQ Quiz</h1>
+
+    <div class="question-box">
+      <div class="question">Q1: Which is NOT a way to declare a variable in JavaScript?</div>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> var</label>
+        <label><input type="radio" name="q1" value="b"> let</label>
+        <label><input type="radio" name="q1" value="c"> constant</label>
+        <label><input type="radio" name="q1" value="d"> const</label>
+      </div>
+    </div>
+
+    <div class="question-box">
+      <div class="question">Q2: What does === check in JavaScript?</div>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> Value only</label>
+        <label><input type="radio" name="q2" value="b"> Data type only</label>
+        <label><input type="radio" name="q2" value="c"> Value + Data type</label>
+        <label><input type="radio" name="q2" value="d"> None</label>
+      </div>
+    </div>
+
+    <div class="question-box">
+      <div class="question">Q3: Which is an example of asynchronous function?</div>
+      <div class="options">
+        <label><input type="radio" name="q3" value="a"> console.log()</label>
+        <label><input type="radio" name="q3" value="b"> setTimeout()</label>
+        <label><input type="radio" name="q3" value="c"> Math.random()</label>
+        <label><input type="radio" name="q3" value="d"> parseInt()</label>
+      </div>
+    </div>
+
+    <div class="question-box">
+      <div class="question">Q4: What is a closure in JavaScript?</div>
+      <div class="options">
+        <label><input type="radio" name="q4" value="a"> A block scope variable</label>
+        <label><input type="radio" name="q4" value="b"> A function inside another function that remembers outer variables</label>
+        <label><input type="radio" name="q4" value="c"> A way to close the browser</label>
+        <label><input type="radio" name="q4" value="d"> None of the above</label>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button onclick="prevQuestion()">⬅ Previous</button>
+      <button onclick="nextQuestion()">Next ➡</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    let current = 0;
+    const questions = document.querySelectorAll(".question-box");
+    const resultDiv = document.getElementById("result");
+
+    // Correct answers
+    const answers = {
+      q1: "c",
+      q2: "c",
+      q3: "b",
+      q4: "b"
+    };
+
+    function showQuestion(index) {
+      questions.forEach((q, i) => {
+        q.style.display = (i === index) ? "block" : "none";
+      });
+    }
+
+    function nextQuestion() {
+      if (current < questions.length - 1) {
+        current++;
+        showQuestion(current);
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function prevQuestion() {
+      if (current > 0) {
+        current--;
+        showQuestion(current);
+      }
+    }
+
+    function finishQuiz() {
+      let score = 0;
+      Object.keys(answers).forEach(q => {
+        const selected = document.querySelector(`input[name="${q}"]:checked`);
+        if (selected && selected.value === answers[q]) {
+          score++;
+        }
+      });
+
+      questions.forEach(q => q.style.display = "none");
+      document.querySelector(".nav-buttons").style.display = "none";
+      resultDiv.style.display = "block";
+      resultDiv.textContent = `🎉 Quiz Finished! Your Score: ${score}/${questions.length}`;
+    }
+
+    // show first question
+    showQuestion(current);
+  </script>
+</body>
+</html>
