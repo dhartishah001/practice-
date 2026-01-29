@@ -1,0 +1,37 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+
+table {
+    width: 30%;
+    border-collapse: collapse;
+    margin: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #f4f4f4;
+}
+
+.green {
+    color: green;
+    font-weight: bold;
+}
+
+.red {
+    color: red;
+    font-weight: bold;
+}

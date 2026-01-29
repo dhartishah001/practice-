@@ -1,0 +1,391 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SherMarket — Dynamic Dashboard (HTML/CSS/JS)</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#16a34a; --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071024 0%, #07172a 100%);color:#e6eef8}
+    .wrap{max-width:1200px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    header h1{font-size:20px;letter-spacing:0.3px}
+    .controls{display:flex;gap:10px;align-items:center}
+    select,input[type=range],button{background:var(--card);border:1px solid var(--glass);color:inherit;padding:8px 10px;border-radius:8px}
+    button{cursor:pointer}
+
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));padding:16px;border-radius:12px;border:1px solid var(--glass-2)}
+
+    /* Stats row */
+    .stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .stat{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+    .stat .label{font-size:12px;color:var(--muted)}
+    .stat .number{font-size:28px;font-weight:700;margin-top:6px;cursor:pointer}
+    .stat .number:hover{opacity:0.9;transform:translateY(-2px)}
+    .stat .delta{font-size:12px;color:var(--accent);margin-top:6px}
+
+    /* Main panels */
+    .panel-left{grid-column:1/8}
+    .panel-right{grid-column:8/13}
+
+    /* mini cards */
+    .mini{display:flex;justify-content:space-between;align-items:center}
+    .list{margin-top:10px}
+    .list li{padding:8px 10px;border-radius:8px;margin-bottom:8px;background:var(--glass);list-style:none}
+
+    /* table */
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+
+    /* chart */
+    .chart-wrap{height:220px}
+    canvas{width:100%;height:220px;border-radius:8px}
+
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6)}
+    .modal .box{width:520px;background:#071428;padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+    .modal .box h3{margin:0 0 8px 0}
+    .close{float:right;cursor:pointer;padding:6px;border-radius:6px}
+
+    /* small screens */
+    @media (max-width:900px){
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .panel-left{grid-column:1/-1}
+      .panel-right{grid-column:1/-1}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>SherMarket — Live Demo Dashboard</h1>
+      <div class="controls">
+        <label for="range">Days:</label>
+        <select id="range">
+          <option value="7">Last 7</option>
+          <option value="14">Last 14</option>
+          <option value="30" selected>Last 30</option>
+        </select>
+        <button id="refresh">Randomize Data</button>
+        <button id="reset">Reset</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card stats">
+        <div class="stat card">
+          <div class="label">Total Revenue</div>
+          <div class="number stat-number" data-key="revenue">₹<span id="revenue">0</span></div>
+          <div class="delta" id="rev-delta">↑ 0.0%</div>
+        </div>
+
+        <div class="stat card">
+          <div class="label">Orders</div>
+          <div class="number stat-number" data-key="orders"><span id="orders">0</span></div>
+          <div class="delta" id="ord-delta">↑ 0.0%</div>
+        </div>
+
+        <div class="stat card">
+          <div class="label">Active Customers</div>
+          <div class="number stat-number" data-key="customers"><span id="customers">0</span></div>
+          <div class="delta" id="cus-delta">↑ 0.0%</div>
+        </div>
+
+        <div class="stat card">
+          <div class="label">Conversion Rate</div>
+          <div class="number stat-number" data-key="conversion"><span id="conversion">0</span>%</div>
+          <div class="delta" id="conv-delta">↑ 0.0%</div>
+        </div>
+      </section>
+
+      <section class="card panel-left">
+        <h3>Revenue (click bars or numbers)</h3>
+        <div class="chart-wrap">
+          <canvas id="lineChart"></canvas>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div style="flex:1" class="card">
+            <strong>Top SKUs</strong>
+            <ul class="list" id="top-skus"></ul>
+          </div>
+          <div style="flex:1" class="card">
+            <strong>Recent Orders</strong>
+            <ul class="list" id="recent-orders"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel-right">
+        <h3>Orders Summary</h3>
+        <div class="mini">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Avg. Order Value</div>
+            <div id="aov" style="font-weight:700;font-size:20px">₹0</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Return Rate</div>
+            <div id="return-rate" style="font-weight:700;font-size:20px">0%</div>
+          </div>
+        </div>
+
+        <table aria-label="Recent orders">
+          <thead><tr><th>Order</th><th>Amount</th><th>Customer</th></tr></thead>
+          <tbody id="orders-table"></tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Modal (details when clicking numbers) -->
+    <div id="modal" class="modal" role="dialog" aria-modal="true">
+      <div class="box">
+        <span class="close" id="modal-close">✕</span>
+        <h3 id="modal-title">Details</h3>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <footer style="text-align:center;margin-top:18px;color:var(--muted);font-size:12px">Demo only — all data generated in-browser (no API).</footer>
+  </div>
+
+  <script>
+    // ---------- SAMPLE DATA GENERATION ----------
+    const state = {
+      days: 30,
+      revenue: [],
+      orders: [],
+      customers: [],
+      skus: [],
+      recentOrders: []
+    }
+
+    function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min }
+
+    function generateData(days){
+      state.days = days
+      state.revenue = []
+      state.orders = []
+      state.customers = []
+      state.skus = []
+      state.recentOrders = []
+
+      const skuNames = ['Sher Classic','Sher Pro','Sher Lite','Sher Max','Sher Kids','Sher Eco','Sher Plus']
+      for(let i=0;i<skuNames.length;i++) state.skus.push({name:skuNames[i], sold:0, revenue:0})
+
+      for(let d=0;d<days;d++){
+        const base = 8000 + Math.round(Math.sin(d/3)*1000)
+        const rev = Math.round(base + rand(-1200,2500))
+        const ord = Math.max(1, Math.round(rev / (rand(400,1500))))
+        const cus = Math.max(1, Math.round(ord * (0.6 + Math.random()*0.6)))
+        state.revenue.push(rev)
+        state.orders.push(ord)
+        state.customers.push(cus)
+
+        // assign to skus randomly
+        for(let i=0;i<ord;i++){
+          const s = rand(0,state.skus.length-1)
+          state.skus[s].sold += 1
+          state.skus[s].revenue += Math.round((rev/ord))
+          // push some recent orders for table
+          if(d > days-7 && state.recentOrders.length < 8){
+            state.recentOrders.push({id: 'S-'+(1000+rand(1,999)), amount: Math.round((rev/ord)), customer: 'Cust'+rand(1,300)})
+          }
+        }
+      }
+
+      // compute conversion rate % roughly
+      const conv = Math.max(0.5, (state.orders.reduce((a,b)=>a+b,0) / (state.customers.reduce((a,b)=>a+b,0)+1)) * 100)
+
+      return {
+        revenueTotal: state.revenue.reduce((a,b)=>a+b,0),
+        ordersTotal: state.orders.reduce((a,b)=>a+b,0),
+        customersTotal: state.customers.reduce((a,b)=>a+b,0),
+        conversion: Number(conv.toFixed(1)),
+        aov: Math.round((state.revenue.reduce((a,b)=>a+b,0) / Math.max(1, state.orders.reduce((a,b)=>a+b,0))))
+      }
+    }
+
+    // ---------- DOM UPDATES ----------
+    const el = {
+      revenue: document.getElementById('revenue'),
+      orders: document.getElementById('orders'),
+      customers: document.getElementById('customers'),
+      conversion: document.getElementById('conversion'),
+      topSkus: document.getElementById('top-skus'),
+      recentOrders: document.getElementById('recent-orders'),
+      ordersTable: document.getElementById('orders-table'),
+      aov: document.getElementById('aov'),
+      returnRate: document.getElementById('return-rate'),
+      revDelta: document.getElementById('rev-delta'),
+      ordDelta: document.getElementById('ord-delta'),
+      convDelta: document.getElementById('conv-delta')
+    }
+
+    function format(n){ return n.toLocaleString('en-IN') }
+
+    function renderSummary(summary, prevSummary){
+      el.revenue.textContent = format(summary.revenueTotal)
+      el.orders.textContent = format(summary.ordersTotal)
+      el.customers.textContent = format(summary.customersTotal)
+      el.conversion.textContent = summary.conversion
+      el.aov.textContent = '₹'+format(summary.aov)
+      el.returnRate.textContent = (rand(1,6)) + '%'
+
+      // simple delta calculation
+      if(prevSummary){
+        el.revDelta.textContent = (diffPct(prevSummary.revenueTotal, summary.revenueTotal) >=0 ? '↑ ':'↓ ') + Math.abs(diffPct(prevSummary.revenueTotal, summary.revenueTotal)).toFixed(1) + '%'
+        el.ordDelta.textContent = (diffPct(prevSummary.ordersTotal, summary.ordersTotal) >=0 ? '↑ ':'↓ ') + Math.abs(diffPct(prevSummary.ordersTotal, summary.ordersTotal)).toFixed(1) + '%'
+        el.convDelta.textContent = (diffPct(prevSummary.conversion, summary.conversion) >=0 ? '↑ ':'↓ ') + Math.abs(diffPct(prevSummary.conversion, summary.conversion)).toFixed(1) + '%'
+      }
+
+      // top skus
+      const sortedSkus = state.skus.slice().sort((a,b)=>b.revenue - a.revenue)
+      el.topSkus.innerHTML = sortedSkus.map(s=>`<li><strong>${s.name}</strong> — ${s.sold} sold — ₹${format(s.revenue)}</li>`).join('')
+
+      // recent orders list
+      el.recentOrders.innerHTML = state.recentOrders.map(o=>`<li><strong>${o.id}</strong> — ₹${format(o.amount)} — ${o.customer}</li>`).join('')
+
+      // orders table
+      el.ordersTable.innerHTML = state.recentOrders.map(o=>`<tr><td>${o.id}</td><td>₹${format(o.amount)}</td><td>${o.customer}</td></tr>`).join('')
+    }
+
+    function diffPct(a,b){ if(a===0) return b===0?0:100; return ((b-a)/Math.abs(a))*100 }
+
+    // ---------- Simple line chart (canvas) ----------
+    const canvas = document.getElementById('lineChart')
+    const ctx = canvas.getContext('2d')
+    function resizeCanvas(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight }
+    window.addEventListener('resize', ()=>{ resizeCanvas(); drawChart() })
+
+    function drawChart(highlightIndex){
+      resizeCanvas()
+      const w = canvas.width, h = canvas.height
+      ctx.clearRect(0,0,w,h)
+      const padding = 30
+      const data = state.revenue
+      if(!data || data.length===0) return
+      const max = Math.max(...data)
+      const min = Math.min(...data)
+      const stepX = (w - padding*2) / (data.length-1 || 1)
+
+      // draw grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)'
+      ctx.lineWidth = 1
+      for(let i=0;i<5;i++){
+        const y = padding + (h- padding*2) * (i/4)
+        ctx.beginPath(); ctx.moveTo(padding,y); ctx.lineTo(w-padding,y); ctx.stroke();
+      }
+
+      // draw line
+      ctx.beginPath();
+      for(let i=0;i<data.length;i++){
+        const x = padding + i*stepX
+        const y = padding + (1 - (data[i]-min)/(max-min+1))*(h-padding*2)
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y)
+      }
+      ctx.strokeStyle = 'rgba(22,163,74,0.85)'
+      ctx.lineWidth = 2.5
+      ctx.stroke()
+
+      // draw points and interactive areas
+      for(let i=0;i<data.length;i++){
+        const x = padding + i*stepX
+        const y = padding + (1 - (data[i]-min)/(max-min+1))*(h-padding*2)
+        ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
+      }
+    }
+
+    // make canvas clickable: map clicks to nearest index
+    canvas.addEventListener('click', (ev)=>{
+      const rect = canvas.getBoundingClientRect()
+      const x = ev.clientX - rect.left
+      const w = canvas.width
+      const padding = 30
+      const data = state.revenue
+      const stepX = (w - padding*2) / (data.length-1 || 1)
+      const idx = Math.round((x - padding)/stepX)
+      if(idx>=0 && idx<data.length) showDetail('day', idx)
+    })
+
+    // ---------- Modal & click handlers ----------
+    const modal = document.getElementById('modal')
+    const modalTitle = document.getElementById('modal-title')
+    const modalBody = document.getElementById('modal-body')
+    document.getElementById('modal-close').addEventListener('click', ()=> modal.style.display='none')
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none' })
+
+    function showDetail(key, idx){
+      modal.style.display = 'flex'
+      if(key==='revenue' || key==='day'){
+        if(key==='revenue') idx = state.revenue.length-1
+        modalTitle.textContent = 'Revenue breakdown'
+        const dayRev = state.revenue[idx]
+        modalBody.innerHTML = `<p><strong>Day ${idx+1} — ₹${format(dayRev)}</strong></p>
+          <p>Orders: ${state.orders[idx]}<br>Customers: ${state.customers[idx]}<br></p>
+          <p>Top products that day (simulated):</p>
+          <ul>${state.skus.slice(0,4).map(s=>`<li>${s.name} — ${Math.max(1,Math.round(s.sold/(idx+3)))} sold</li>`).join('')}</ul>`
+      } else if(key==='orders'){
+        modalTitle.textContent = 'Orders — details'
+        modalBody.innerHTML = `<p>Total orders: ${format(state.orders.reduce((a,b)=>a+b,0))}</p>
+          <p>Recent orders:</p><ul>${state.recentOrders.map(o=>`<li>${o.id} — ₹${format(o.amount)} — ${o.customer}</li>`).join('')}</ul>`
+      } else if(key==='customers'){
+        modalTitle.textContent = 'Active customers'
+        modalBody.innerHTML = `<p>Active customers in range: ${format(state.customers.reduce((a,b)=>a+b,0))}</p>
+          <p>Sample customers:</p><ul>${Array.from({length:6}).map((_,i)=>`<li>Customer ${rand(100,999)}</li>`).join('')}</ul>`
+      } else if(key==='conversion'){
+        modalTitle.textContent = 'Conversion rate'
+        modalBody.innerHTML = `<p>Conversion: ${document.getElementById('conversion').textContent}%</p>
+        <p>Tips: improve product pages, faster checkout, clear shipping info.</p>`
+      }
+    }
+
+    // attach click listeners to all stat numbers
+    document.querySelectorAll('.stat-number').forEach(elm=>{
+      elm.addEventListener('click', ()=>{
+        const key = elm.dataset.key
+        showDetail(key)
+      })
+    })
+
+    // ---------- UI controls ----------
+    const range = document.getElementById('range')
+    document.getElementById('refresh').addEventListener('click', ()=>{
+      const days = Number(range.value)
+      const prev = generateData(days)
+      // randomize again to create new prev and current for delta example
+      const prevTwo = generateData(days)
+      const current = generateData(days)
+      renderSummary(current, prevTwo)
+      drawChart()
+    })
+
+    document.getElementById('reset').addEventListener('click', ()=>{
+      init()
+    })
+
+    range.addEventListener('change', ()=>{ init() })
+
+    // ---------- init ----------
+    function init(){
+      const days = Number(range.value)
+      // keep a copy for previous range to show deltas
+      const prevSummary = generateData(Math.max(7, Math.round(days/2)))
+      const summary = generateData(days)
+      renderSummary(summary, prevSummary)
+      drawChart()
+    }
+
+    // initialize on load
+    init()
+  </script>
+</body>
+</html>
