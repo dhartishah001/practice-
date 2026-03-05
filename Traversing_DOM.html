@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traversing DOM</title>
+</head>
+
+<body>
+    <h1>Traversing DOM</h1>
+
+    <div id="great-grand-parent">
+        <div id="grand-parent">
+            <div id="parent">
+                Ramesh
+                <div id="child">child</div>
+                <div id="child">child</div>
+                patel
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let great_grand_parent = document.getElementById("great-grand-parent");
+        let grand_parent = document.getElementById("grand-parent");
+        let parent = document.getElementById("parent");
+        let child = document.getElementById("child");
+
+        //   console.log(great_grand_parent);
+        //   console.log(grand_parent);
+        //   console.log(parent);
+        //   console.log(child);
+
+        console.log(child.parentNode);
+        console.log(grand_parent.parentNode);
+        console.log(grand_parent.childNodes);
+        grand_parent.childNodes[0].innerText = "Hi";
+        grand_parent.childNodes[1].innerText = "Rohan gupta";
+        grand_parent.childNodes[2].innerText = "bye ";
+        // console.log(grand_parent.childNodes[0]);
+        // console.log(grand_parent.childNodes[1]);
+        // console.log(grand_parent.childNodes[2]);
+
+        // console.log(parent.firstChild);
+        // console.log(parent.lastChild);
+
+        // console.log(parent.previousSibling.innerText);
+        // console.log(parent.nextSibling.innerText);
+
+
+
+
+        // // Create a new element to insert
+        // const newElement = document.createElement("div");
+        // newElement.textContent = "This is a new div.";
+
+        // // Get the reference element (the element before which to insert)
+        // const referenceElement = document.getElementById("myReference");
+
+        // // Insert the new element before the reference element
+        // parent.insertBefore(newElement, referenceElement);
+    </script>
+</body>
+
+</html>
