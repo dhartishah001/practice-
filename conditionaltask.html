@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let hindi=prompt("enter your marks in hindi")
+        let gujarti=prompt("enter your marks in gujarti")
+        let english=prompt("enter your marks in english")
+        let computer=prompt("enter your marks in computer")
+
+        
+        let mark=(parseFloat(hindi)+parseFloat(gujarti)+parseFloat(english)+parseFloat(computer));
+        let grade = (mark/400)*100;
+
+       if(hindi > 100){
+        document.writeln("write carrect mark for hindi");
+       }
+        if(gujarti > 100){
+        document.writeln("write carrect mark for gujarti");
+       }
+        if(english > 100){
+        document.writeln("write carrect mark for english");
+       }
+        if(computer > 100){
+        document.writeln("write carrect mark for gujari");
+       }
+       else if(grade <=100 && grade >80){
+        document.writeln("cogretulasion you are pass with distinction");
+        document.writeln("your total persentage is " + "",grade,"%");
+       }
+       else if(grade <=80 && grade >75){
+        document.writeln("cogretulasion you are pass with first class");
+        document.writeln("your total persentage is " + "",grade,"%");
+       }
+       else if(grade <=75 && grade >50){
+        document.writeln("cogretulasion you are pass with second class");
+        document.writeln("your total persentage is " + "",grade,"%");
+       }
+       else if(grade <=50 && grade >33){
+        document.writeln("cogretulasion you are pass with third class");
+        document.writeln("your total persentage is " + "",grade,"%");
+       }
+       else{
+        document.writeln("sorry you are faile")
+        document.writeln("your total persentage is " + "",grade,"%");
+       }
+    </script>
+</body>
+</html>
